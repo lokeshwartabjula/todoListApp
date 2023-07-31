@@ -23,7 +23,7 @@ const SignUp = () => {
 
     signupUser(email, password)
       .then((response) => {
-        if (response.status === 201) {
+        if (response.status === 200) {
           console.log(response.data);
           navigate("/home", { state: { email: response.data.email } });
         }

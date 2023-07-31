@@ -1,11 +1,11 @@
 import api from "./api";
 
 export const loginUser = (email, password) => {
-  return api.post("user/login", { email, password });
+  return api.post("/TodoApiLogin", { email, password });
 };
 
 export const signupUser = (email, password) => {
-  return api.post("user/signup", { email, password });
+  return api.post("/TodoApiSignUp", { email, password });
 };
 
 export const forgotPassword = (email) => {

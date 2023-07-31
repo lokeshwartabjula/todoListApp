@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
-import { deleteTodo, getTodoById, assignTodo } from "../services/todoService";
+import { deleteTodo, getTodoById, assignTodo, afterAssign, remindFriend } from "../services/todoService";
 import { priorityMapping } from "../utils/priorityMapping";
 import { toast } from "react-toastify";
 import Modal from 'react-modal';
@@ -27,28 +27,28 @@ const TodoDetails = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchTodoDetails = async () => {
-      try {
-        const response = await getTodoById(todoId);
-        if (response.status === 200) {
-          setTodo(response.data);
-        }
-      } catch (error) {
-        if (
-          error.response &&
-          error.response.data &&
-          error.response.data.errors
-        ) {
-          const { errors } = error.response.data;
-          Object.keys(errors).forEach((key) => {
-            toast.error(errors[key]);
-          });
-        }
-      }
-    };
-
     fetchTodoDetails();
   }, [todoId]);
+
+  const fetchTodoDetails = async () => {
+    try {
+      const response = await getTodoById(todoId);
+      if (response.status === 200) {
+        setTodo(response.data);
+      }
+    } catch (error) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.errors
+      ) {
+        const { errors } = error.response.data;
+        Object.keys(errors).forEach((key) => {
+          toast.error(errors[key]);
+        });
+      }
+    }
+  };
 
   const handleDeleteTodo = async () => {
     try {
@@ -63,10 +63,23 @@ const TodoDetails = () => {
     e.preventDefault();
 
     try {
-      await assignTodo(todoId, friendEmail);
-      // setIsOpen(false);
-      setOptSmModal(false);
-      setFriendEmail("");
+      const response = await assignTodo(todoId, friendEmail);
+      if (response.status === 200) {
+        // setIsOpen(false);
+        fetchTodoDetails();
+        setOptSmModal(false);
+        setFriendEmail("");
+      }
+    } catch (error) {
+      console.log("Error assigning todo:", error);
+    }
+  };
+
+  const handleRemindFriend = async (e) => {
+    e.preventDefault();
+
+    try {
+      await remindFriend(todoId, todo.friendEmail);
     } catch (error) {
       console.log("Error assigning todo:", error);
     }
@@ -96,6 +109,7 @@ const TodoDetails = () => {
             <div className="mb-3">
               Priority: {priorityMapping[todo.priority]}
             </div>
+            {todo.friendEmail && <div className="mb-3">Assigned to: {todo.friendEmail}</div>}
             <div>Created on: {formattedDate}</div>
             <div className="mt-2">
               <button
@@ -106,13 +120,23 @@ const TodoDetails = () => {
               >
                 Update
               </button>
-              <button
-                className="btn btn-info me-3"
-                // onClick={() => setIsOpen(true)}
-                onClick={toggleShow}
-              >
-                Assign this item to your friend
-              </button>
+              {!todo.isAssignedToFriend && (
+                <button
+                  className="btn btn-info me-3"
+                  // onClick={() => setIsOpen(true)}
+                  onClick={toggleShow}
+                >
+                  Assign this item to your friend
+                </button>
+                )}
+              {todo.isAssignedToFriend && todo.friendEmail && (
+                <button
+                  className="btn btn-info me-3"
+                  onClick={handleRemindFriend}
+                >
+                  Remind your friend
+                </button>
+              )}
               <button
                 className="btn btn-danger me-2"
                 onClick={handleDeleteTodo}
