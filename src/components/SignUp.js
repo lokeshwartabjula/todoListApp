@@ -23,6 +23,8 @@ const SignUp = () => {
 
     signupUser(email, password)
       .then((response) => {
+        console.log("Response after signup", response);
+        alert("Verification mail has been sent, please confirm and login to continue");
         if (response.status === 200) {
           console.log(response.data);
           navigate("/home", { state: { email: response.data.email } });

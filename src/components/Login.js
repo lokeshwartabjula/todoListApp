@@ -13,10 +13,11 @@ function Login() {
 
     loginUser(email, password)
       .then((response) => {
-        if (response.status === 200) {
+        console.log("Response after login",response);
+        if (response.accessToken) {
           console.log(response.data);
           // Redirect to the home page
-          navigate("/home", { state: { email: response.data.email } });
+          navigate("/home", { state: { email: email } });
         }
       })
       .catch((error) => {

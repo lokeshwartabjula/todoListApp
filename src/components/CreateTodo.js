@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { CreateNewTodo } from "../services/todoService";
+import { CreateNewTodo, callAmazonTextractApi } from "../services/todoService";
 import { toast } from "react-toastify";
+
 
 const CreateTodo = () => {
   const location = useLocation();
@@ -13,7 +14,11 @@ const CreateTodo = () => {
     dueDate: null,
     priority: null,
     user: email,
+    friendEmail:""
   });
+
+  const [pdfFile, setPdfFile] = useState(null);
+
 
   const handleFormSubmit = async (event) => {
     event.preventDefault();
@@ -33,6 +38,28 @@ const CreateTodo = () => {
       }
     }
   };
+
+  const handleFileChange = async (event) => {
+    console.log("Inside handleFileChange");
+    await setPdfFile(event.target.files[0]);
+    const pdfFileNew = event.target.files[0];
+    if (pdfFileNew) {
+      // call Amazon Textract API with pdfFile
+      // This is a placeholder function. Replace it with the actual API call in your environment.
+      const descriptionFromPdf = await callAmazonTextractApi(pdfFileNew);
+      setTodo((prevTodo) => ({
+        ...prevTodo,
+        description: descriptionFromPdf,
+      }));
+    }
+    
+  };
+
+  const handleFileUpload = async () => {
+    console.log("Inside handleFileUpload");
+   
+  };
+
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -76,6 +103,20 @@ const CreateTodo = () => {
             onChange={handleInputChange}
           ></textarea>
         </div>
+
+        {/* <div class="mb-3">
+          <label for="upload-pdf" class="form-label">
+            Upload PDF:
+          </label>
+          <input
+            type="file"
+            accept=".pdf"
+            class="form-control outline-input"
+            id="upload-pdf"
+            onChange={handleFileChange}
+            onClick={handleFileUpload}
+          />
+        </div> */}
 
         <div class="mb-3">
           <label for="dueDate" class="form-label">
